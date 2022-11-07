@@ -40,33 +40,43 @@ void printGrafo(vector<vector<int>> grafo){
     }
 }
 
-void dikjstra(vector<vector<int>> grafo, int raiz){
-    vector<int> nodosIncorporados = {};
-    vector<int> nodosRestantes(grafo.size());
+vector<int> dikjstra(vector<vector<int>> grafo, int raiz){
+    vector<int> nodosIncorporados(1,INDEFINIDO);
     vector<int> distancia(grafo.size());
+    priority_queue <pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minHeap;
 
     nodosIncorporados[0] = raiz;
     distancia[raiz] = 0;
 
-    for(int u = 0; u < grafo.size(); ++u){
-        if(grafo[raiz][u] != INDEFINIDO)
+    //pone todas las distancias en cien mil
+    for(int u = 1; u < grafo.size(); ++u){
+        if(grafo[raiz][u] != INDEFINIDO){
             distancia[u] = grafo[raiz][u];
-        else
-            distancia[u] = INT64_MAX;
-
-    }
-    while(nodosIncorporados.size() != grafo.size()){
-        int w = min(distancia);
-        nodosIncorporados.push_back(w);
-        for(int i = 0; i < nodosRestantes.size()- nodosIncorporados.size(); ++i){
-            if(distancia[i] > distancia[w] + grafo[w][i])
-                distancia[i] = distancia[w] + grafo[w][i];
+            minHeap.push(make_pair(distancia[u], u));
+            //cout << "el nodo " << u << " esta a distancia " << distancia[u] << " del portero" << endl;
+        }
+        else{
+            distancia[u] = 100000000;
+            minHeap.push(make_pair(distancia[u], u));
+            //cout << "el nodo " << u << " esta a distancia " << distancia[u] << " del portero" << endl;
         }
     }
-    
+    int i = 0;
+    while(i < grafo.size()){
+        int w = minHeap.top().first;
+        nodosIncorporados[minHeap.top().second] = minHeap.top().second;
+        minHeap.pop();
+        
+        for(int i = 0; i < nodosIncorporados.size() & nodosIncorporados[i] == INDEFINIDO; ++i){
+          if(distancia[i] > distancia[w] + grafo[w][i])
+                distancia[i] = distancia[w] + grafo[w][i];
+                minHeap.push(make_pair(i, distancia[i]));
+        }
+        ++i;
+    }
+    return distancia;
 }
 
-priority_queue <int, vector<int>, greater<int> > min_heap;
 //priority_queue <int, vector<int>, greater<int> > pq;
 // `The third parameter, ‘Comparison Type’ can either be a function or factor (aka function object) that must have bool as return-type and must have 2 arguments.
 
@@ -95,10 +105,17 @@ int main(int argc, char const *argv[]){
         for(int j = 1; j <= cantReglas; ++j){
             int monedas, feligres;
             entrada >> monedas >> feligres;
-            grafo[i][feligres] = monedas;
-        } 
+            if(grafo[i][feligres] == INDEFINIDO)
+                grafo[i][feligres] = monedas;
+            if(grafo[i][feligres] != INDEFINIDO & grafo[i][feligres] > monedas)
+                grafo[i][feligres] = monedas;
+        }
     }
     printGrafo(grafo);
+    vector<int> pi = dikjstra(grafo, 0);
+    //print(pi);
+
+ 
     return 0;
 }
 
@@ -109,4 +126,4 @@ int main(int argc, char const *argv[]){
 {6,-1,4}
 {5,-1,-1}
 
-*/
+*/ 
